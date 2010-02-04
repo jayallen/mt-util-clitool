@@ -1,8 +1,6 @@
 # AUTHOR:   Jay Allen, Endevver Consulting
-# DATE:     July 29th, 2008
-# Version:  2.0
-#
-# $Id$
+# DATE:     February 4th, 2010
+# Version:  3.0
 
 This library enables you to easily create command-line scripts which
 interface with Movable Type.
@@ -10,21 +8,25 @@ interface with Movable Type.
 
 ### USAGE ###
 
-    To use this library, add the following to your code so that it runs BEFORE
-    you call any Movable Type libraries.  This is best done in a BEGIN block.
+    To use this library, create a command-line script like so customizing
+    the package name on the last line with your desired package name for
+    your script's lib module:
 
-    my $mt;
-    BEGIN {
+        #!/usr/bin/perl
+        use strict;
         use FindBin qw($Bin);
-        use lib "$Bin/lib";
-        use lib "$Bin/extlib";
-        use MT::CLITool;
-        my $mt = MT::CLITool->new() or die MT::CLITool->errstr;
-    }
+        use lib "$Bin/../lib";
+        BEGIN {
+            my $mtdir = $ENV{MT_HOME} ? "$ENV{MT_HOME}/" : '';
+            unshift @INC, "$mtdir$_" foreach qw(lib extlib );
+        }
+        use MT::Bootstrap::CLI App => 'MyPlugin::Tool::MyCommand';
 
-    The $mt variable is your MT object.  Please see EXAMPLE for other
-    more advanced usage.
-
+    Then, create a module with the chosen package name containing your
+    script's core code.
+    
+    **NOTE: Will complete soon.  The overhaul is extensive and
+    everything below here needs a rewrite.**
 
 ### EXAMPLES ###
 

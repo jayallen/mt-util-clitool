@@ -18,6 +18,9 @@ use base 'MT::Bootstrap';
 sub import {
     my $pkg = shift;
 
+    die("MT_HOME environment variable not set")
+        unless $ENV{MT_HOME} and -d $ENV{MT_HOME};
+
     # Setting GATEWAY_INTERFACE prevents MT::Bootstrap from assuming the
     # current app is running under FastCGI and is the only one of the
     # environment variables that are not used elsewhere in MT (It's only used
