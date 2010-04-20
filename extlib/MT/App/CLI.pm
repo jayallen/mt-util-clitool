@@ -1,7 +1,6 @@
 ### MT::App:CLI
-# AUTHOR:   Jay Allen, Endevver
+# AUTHOR:   Jay Allen, Endevver LLC (http://endevver.com)
 # See README.txt in this package for more details
-# $Id: CLI.pm 13 2008-02-15 04:37:53Z jay $
 
 package MT::App::CLI;
 
@@ -13,14 +12,10 @@ use Getopt::Long qw( :config auto_version auto_help );
 use Pod::Usage;
 use base 'MT::App';
 
-use MT::Log::Log4perl qw(l4mtdump); use Log::Log4perl qw( :resurrect );
+# use MT::Log::Log4perl qw(l4mtdump); use Log::Log4perl qw( :resurrect );
 ###l4p our $logger = MT::Log::Log4perl->new();
 
 use constant CONFIG => 'mt-config.cgi';
-
-sub show_usage { }
-
-sub show_docs { }
 
 sub option_spec {
     return ('help|man!', 'usage|h!', 'verbose|v+' );
@@ -30,7 +25,9 @@ sub init {
     my $app = shift;
     ###l4p $logger ||= MT::Log::Log4perl->new(); $logger->trace();
     $app->SUPER::init(@_) or return;
-    # $app->{no_print_body} = 1;
+    # $app->add_methods( 
+    #     'default' => \&mode_default
+    # );
     $app;
 }
 
@@ -71,6 +68,12 @@ sub pre_run {
     $app->SUPER::pre_run(@_);
 }
 
+sub mode_default {
+    my $app = shift;
+    ###l4p $logger ||= MT::Log::Log4perl->new(); $logger->trace();
+    $app->show_usage();
+}
+
 sub post_run {
     my $app = shift;
     ###l4p $logger ||= MT::Log::Log4perl->new(); $logger->trace();
@@ -92,7 +95,6 @@ sub print_trace {
     my ($app, $trace) = @_;
     my $del = 'TRACE------'x10;
     $app->print("\n",join("\n", $del, $trace, $del), "\n");
-    
 }
 
 sub show_error {
@@ -102,6 +104,36 @@ sub show_error {
     
     $app->print("FATAL> $error (".(caller(1))[3].')'. $stack);
     return;
+}
+
+sub show_usage { 
+    my $app = shift;
+    ###l4p $logger ||= MT::Log::Log4perl->new(); $logger->trace();
+    pod2usage({
+        # Two defaults for usage, can be overriden
+         -exitval => 1,
+         -verbose => 0,
+        # Arguments supplied by caller
+         (
+             @_ != 1              ? @_                    #  > 1 or 0
+           : ref $_[0] eq 'HASH'  ? %{ $_[0] }            # hashref
+           : ref $_[0] eq 'ARRAY' ? @{ $_[0] }            # arrayref
+           : ! ref $_[0]          ? ( -message => shift ) # msg only
+           : ()                                           # no args
+         )
+    });
+}
+
+sub show_options { 
+    my $app = shift;
+    ###l4p $logger ||= MT::Log::Log4perl->new(); $logger->trace();
+    pod2usage(@_ ? @_ : { -exitval => 1, -verbose => 1 });
+}
+
+sub show_docs {
+    my $app = shift;
+    ###l4p $logger ||= MT::Log::Log4perl->new(); $logger->trace();
+    pod2usage(@_ ? @_ : { -exitval => 1, -verbose => 2 });
 }
 
 sub send_http_header { }
@@ -136,35 +168,9 @@ sub mt_dir {
 }
 
 sub load_by_name_or_id {
-    my ($self, $model, $value, $die) = @_;
-
-    my ($terms, $termkey);
-    if ( defined $model and defined $value ) {
-        $terms             = {};
-        $termkey           = ( $value =~ m{^\d+$} ) ? 'id' : 'name';
-        $terms->{$termkey} = $value;
-        my $obj            = MT->model( $model )->load( $terms );
-        return $obj if $obj;
-    }
-
-    my $err
-        = sprintf "ERROR: Failed to load %s by %s '%s': %s\n",
-             $model, $termkey, $value, MT->model( $model )->errstr || '';
-
-    if ( ref $die eq 'CODE' ) {
-        return $die->( @_, $err );
-    }
-    elsif ( $die ) {
-        die $err;
-    }
-    elsif ( ref $self and $self->can('error') ) {
-        return $self->error($err);
-    }
-    else {
-        warn $err;
-    }
+    require MT::CLI::Util;
+    MT::CLI::Util::load_by_name_or_id(@_);
 }
-
 
 
 1;
