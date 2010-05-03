@@ -50,7 +50,6 @@ sub init_options {
     my $opts_good = GetOptions(
         \%opt, $app->option_spec()
     ) or $app->show_usage({ -exitval => 2, -verbose => 1 });
-    
     $app->show_usage() if $opt{usage};
     $app->show_docs()  if $opt{help};
     $app->{options} = \%opt;
@@ -66,6 +65,11 @@ sub pre_run {
     my $app = shift;
     ###l4p $logger ||= MT::Log::Log4perl->new(); $logger->trace();
     $app->SUPER::pre_run(@_);
+
+    if ( my $blog_param = $app->options()->{blog} ) {
+        my $blog = $app->load_by_name_or_id( 'blog', $blog_param );
+        $app->blog( $blog ) if $blog;
+    }
 }
 
 sub mode_default {
