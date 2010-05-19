@@ -49,7 +49,11 @@ sub init_options {
     my %opt = ();
     my $opts_good = GetOptions(
         \%opt, $app->option_spec()
-    ) or $app->show_usage({ -exitval => 2, -verbose => 1 });
+    );
+    unless ( $opts_good ) {
+        print STDERR join( '', @{$app->{trace}} );
+        $app->show_usage({ -exitval => 2, -verbose => 0 });
+    }
     $app->show_usage() if $opt{usage};
     $app->show_docs()  if $opt{help};
     $app->{options} = \%opt;
@@ -65,8 +69,11 @@ sub pre_run {
     my $app = shift;
     ###l4p $logger ||= MT::Log::Log4perl->new(); $logger->trace();
     $app->SUPER::pre_run(@_);
-
-    if ( my $blog_param = $app->options()->{blog} ) {
+    my $opt = $app->options();
+    my $blog_param = defined $opt->{blog}       ? $opt->{blog}
+                   : defined $opt->{blog_id}    ? $opt->{blog_id}
+                                                : undef;
+    if ( $blog_param ) { # 0 is not valid!
         my $blog = $app->load_by_name_or_id( 'blog', $blog_param );
         $app->blog( $blog ) if $blog;
     }
