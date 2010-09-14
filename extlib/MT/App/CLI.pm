@@ -12,8 +12,12 @@ use Getopt::Long qw( :config auto_version auto_help );
 use Pod::Usage;
 use base 'MT::App';
 
-# use MT::Log::Log4perl qw(l4mtdump); use Log::Log4perl qw( :resurrect );
+our $VERSION = '3.1';
+
+use MT::Log::Log4perl qw(l4mtdump); use Log::Log4perl qw( :resurrect );
 ###l4p our $logger = MT::Log::Log4perl->new();
+
+$| = 1;
 
 use constant CONFIG => 'mt-config.cgi';
 
@@ -181,6 +185,11 @@ sub mt_dir {
 sub load_by_name_or_id {
     require MT::CLI::Util;
     MT::CLI::Util::load_by_name_or_id(@_);
+}
+
+sub confirm_action {
+    require MT::CLI::Util;
+    MT::CLI::Util::confirm_action(@_);
 }
 
 

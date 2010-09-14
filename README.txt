@@ -1,10 +1,9 @@
 # AUTHOR:   Jay Allen, Endevver Consulting
-# DATE:     February 4th, 2010
-# Version:  3.0
+# DATE:     September 13th, 2010
+# Version:  3.1
 
 This library enables you to easily create command-line scripts which
 interface with Movable Type.
-
 
 ### USAGE ###
 
